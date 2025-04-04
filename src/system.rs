@@ -1,4 +1,6 @@
 use std::collections::LinkedList;
+use std::fs;
+use std::time::Instant;
 
 use chrono::{Local, Timelike};
 use macroquad::prelude::*;
@@ -23,6 +25,9 @@ const DOCK_SPACING: u32 = 16;
 
 pub static mut LAST_MOUSE_POS: Vec2 = Vec2::new(0.0, 0.0);
 pub static mut TEXTURE_STORAGE: TextureStorage = TextureStorage::empty();
+
+const HACK_FILE_NAME: &str = "secret.hack";
+const USB_NAME: &str = "FIT8G";
 
 pub struct TextureStorage {
     document_icon: Option<Texture2D>,
@@ -49,6 +54,11 @@ impl TextureStorage {
 pub struct EscOS {
     logo_texture: Texture2D,
     windows: Vec<Box<dyn Window>>,
+
+    hack_file_content: String,
+    last_usb_check: Instant,
+    usb_path: String,
+    usb_opened: bool,
 }
 
 impl EscOS {
@@ -61,16 +71,27 @@ impl EscOS {
             };
         }
 
+        let user = whoami::username();
         EscOS {
             logo_texture: load_texture("assets/logo.png").await.unwrap(),
             windows: vec![
                 LoginWindow::new_boxed().await,
                 TextWindow::new_boxed().await,
             ],
+            hack_file_content: fs::read_to_string("assets/".to_string() + HACK_FILE_NAME).unwrap(),
+            last_usb_check: Instant::now(),
+            usb_path: format!("/run/media/{user}/{USB_NAME}/"),
+            usb_opened: false,
         }
     }
 
     pub fn tick(&mut self) {
+        // Check hack file
+        if self.check_hack_file() {
+            self.usb_opened = true;
+            // Open hacking minigame
+        }
+
         self.draw_background();
 
         for win in &mut self.windows {
@@ -190,5 +211,23 @@ impl EscOS {
         }
 
         root_ui().pop_skin();
+    }
+
+    fn check_hack_file(&mut self) -> bool {
+        if self.usb_opened {
+            return true;
+        }
+
+        let diff = Instant::now().duration_since(self.last_usb_check);
+        if diff.as_secs_f32() < 1.0 {
+            return false;
+        }
+
+        self.last_usb_check = Instant::now();
+        let maybe_content = fs::read_to_string(self.usb_path.clone() + HACK_FILE_NAME).ok();
+        match maybe_content {
+            Some(content) => content == self.hack_file_content,
+            None => false,
+        }
     }
 }

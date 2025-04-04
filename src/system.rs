@@ -1,5 +1,6 @@
 use std::collections::LinkedList;
 use std::fs;
+use std::process::{Child, Command};
 use std::time::Instant;
 
 use chrono::{Local, Timelike};
@@ -27,7 +28,7 @@ pub static mut LAST_MOUSE_POS: Vec2 = Vec2::new(0.0, 0.0);
 pub static mut TEXTURE_STORAGE: TextureStorage = TextureStorage::empty();
 
 const HACK_FILE_NAME: &str = "secret.hack";
-const USB_NAME: &str = "FIT8G";
+const USB_NAME: &str = "HACKY";
 
 pub struct TextureStorage {
     document_icon: Option<Texture2D>,
@@ -59,10 +60,18 @@ pub struct EscOS {
     last_usb_check: Instant,
     usb_path: String,
     usb_opened: bool,
+
+    udiskie: Child,
 }
 
 impl EscOS {
     pub async fn new() -> Self {
+        // Spawn udiskie for automounting
+        let udiskie = Command::new("udiskie")
+            .arg("-a")
+            .spawn()
+            .expect("Failed to spawn udiskie!");
+
         // Load Texture storage
         unsafe {
             TEXTURE_STORAGE = TextureStorage {
@@ -82,6 +91,7 @@ impl EscOS {
             last_usb_check: Instant::now(),
             usb_path: format!("/run/media/{user}/{USB_NAME}/"),
             usb_opened: false,
+            udiskie,
         }
     }
 
@@ -229,5 +239,11 @@ impl EscOS {
             Some(content) => content == self.hack_file_content,
             None => false,
         }
+    }
+}
+
+impl Drop for EscOS {
+    fn drop(&mut self) {
+        self.udiskie.kill().expect("Failed to kill udiskie!");
     }
 }

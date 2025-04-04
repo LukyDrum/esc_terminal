@@ -135,7 +135,7 @@ impl Window for LoginWindow {
         WindowReturnAction::None
     }
 
-    fn icon(&self) -> Option<&Texture2D> {
+    fn icon(&self) -> Option<Texture2D> {
         None
     }
 }

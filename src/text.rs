@@ -1,8 +1,10 @@
 use macroquad::prelude::*;
 
 use crate::{
-    system::{BG_COLOR, FG_COLOR, LAST_MOUSE_POS},
-    windows::{draw_outlined_box, draw_window_top_bar, Window, WindowReturnAction},
+    system::{BG_COLOR, FG_COLOR, LAST_MOUSE_POS, TEXTURE_STORAGE},
+    windows::{
+        draw_outlined_box, draw_window_top_bar, minimize_button, Window, WindowReturnAction,
+    },
 };
 
 const HEADER_HEIGHT: f32 = 70.0;
@@ -11,7 +13,9 @@ pub struct TextWindow {
     position: Vec2,
     size: Vec2,
     is_visible: bool,
-    icon: Texture2D,
+    /// Relative to top-left
+    minimize_position_relative: Vec2,
+    minimize_size: Vec2,
 }
 
 impl Window for TextWindow {
@@ -23,7 +27,8 @@ impl Window for TextWindow {
             position: Vec2::new(screen_width() * 0.5, screen_height() * 0.7),
             size: Vec2::new(500.0, 700.0),
             is_visible: true,
-            icon: load_texture("assets/document_icon.png").await.unwrap(),
+            minimize_position_relative: Vec2::new(460.0, HEADER_HEIGHT * 0.5),
+            minimize_size: Vec2::ZERO,
         })
     }
 
@@ -69,6 +74,8 @@ impl Window for TextWindow {
             None,
             FG_COLOR,
         );
+
+        self.minimize_size = minimize_button(self.top_left() + self.minimize_position_relative);
     }
 
     fn is_visible(&self) -> bool {
@@ -91,11 +98,15 @@ impl Window for TextWindow {
             self.position += diff;
         }
 
+        if is_mouse_button_pressed(MouseButton::Left) && self.is_pos_in_minimize_button(pos) {
+            self.set_visibility(false);
+        }
+
         WindowReturnAction::None
     }
 
-    fn icon(&self) -> Option<&Texture2D> {
-        Some(&self.icon)
+    fn icon(&self) -> Option<Texture2D> {
+        unsafe { TEXTURE_STORAGE.document() }
     }
 }
 
@@ -105,5 +116,11 @@ impl TextWindow {
             && pos.x < self.top_left().x + self.size.x
             && pos.y > self.top_left().y
             && pos.y < self.top_left().y + HEADER_HEIGHT
+    }
+
+    fn is_pos_in_minimize_button(&self, pos: Vec2) -> bool {
+        let min_tl = self.top_left() + self.minimize_position_relative - self.minimize_size * 0.5;
+        let min_br = self.top_left() + self.minimize_position_relative + self.minimize_size * 0.5;
+        pos.x > min_tl.x && pos.x < min_br.x && pos.y > min_tl.y && pos.y < min_br.y
     }
 }

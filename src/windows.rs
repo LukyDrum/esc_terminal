@@ -1,7 +1,6 @@
-use macroquad::{
-    prelude::*,
-    ui::{root_ui, widgets::Button},
-};
+use macroquad::prelude::*;
+
+use crate::system::{BG_COLOR, TEXTURE_STORAGE};
 
 pub trait Window {
     async fn new_boxed() -> Box<dyn Window>
@@ -20,13 +19,13 @@ pub trait Window {
 
     fn handle_input(&mut self) -> WindowReturnAction;
 
-    fn icon(&self) -> Option<&Texture2D>;
+    fn icon(&self) -> Option<Texture2D>;
 }
 
 #[derive(Clone, Copy)]
 pub enum WindowReturnAction {
     None,
-    Close,
+    Minimize,
 }
 
 pub fn draw_outlined_box(
@@ -61,4 +60,17 @@ pub fn draw_window_top_bar(
         font_size,
         fg_color,
     );
+}
+
+pub fn minimize_button(position: Vec2) -> Vec2 {
+    let texture = unsafe { TEXTURE_STORAGE.minimize().unwrap() };
+    let size = texture.size();
+    draw_texture(
+        &texture,
+        position.x - size.x * 0.5,
+        position.y - size.y * 0.5,
+        BG_COLOR,
+    );
+
+    size
 }

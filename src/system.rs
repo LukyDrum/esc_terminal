@@ -22,6 +22,29 @@ const DOCK_ICON_SIZE: u32 = 64;
 const DOCK_SPACING: u32 = 16;
 
 pub static mut LAST_MOUSE_POS: Vec2 = Vec2::new(0.0, 0.0);
+pub static mut TEXTURE_STORAGE: TextureStorage = TextureStorage::empty();
+
+pub struct TextureStorage {
+    document_icon: Option<Texture2D>,
+    minimize_icon: Option<Texture2D>,
+}
+
+impl TextureStorage {
+    const fn empty() -> Self {
+        TextureStorage {
+            document_icon: None,
+            minimize_icon: None,
+        }
+    }
+
+    pub fn document(&self) -> Option<Texture2D> {
+        self.document_icon.clone()
+    }
+
+    pub fn minimize(&self) -> Option<Texture2D> {
+        self.minimize_icon.clone()
+    }
+}
 
 pub struct EscOS {
     logo_texture: Texture2D,
@@ -30,6 +53,14 @@ pub struct EscOS {
 
 impl EscOS {
     pub async fn new() -> Self {
+        // Load Texture storage
+        unsafe {
+            TEXTURE_STORAGE = TextureStorage {
+                document_icon: load_texture("assets/document_icon.png").await.ok(),
+                minimize_icon: load_texture("assets/minimize.png").await.ok(),
+            };
+        }
+
         EscOS {
             logo_texture: load_texture("assets/logo.png").await.unwrap(),
             windows: vec![
@@ -94,7 +125,7 @@ impl EscOS {
             .windows
             .iter()
             .enumerate()
-            .map(|(index, win)| (win.icon().cloned(), index))
+            .map(|(index, win)| (win.icon(), index))
             .filter_map(|(opt, index)| match opt {
                 Some(texture) => Some((texture, index)),
                 None => None,

@@ -1,5 +1,6 @@
 use chrono::{Local, Timelike};
 use macroquad::prelude::*;
+use macroquad::ui::{root_ui, Style};
 
 use crate::login::LoginWindow;
 use crate::text::TextWindow;
@@ -14,6 +15,8 @@ const BAR_TEXT_COLOR: Color = BG_COLOR;
 const TOP_BAR_HEIGHT: f32 = 50.0;
 const BAR_FONT_SIZE: (u16, f32) = (1, 40.0);
 
+pub static mut LAST_MOUSE_POS: Vec2 = Vec2::new(0.0, 0.0);
+
 pub struct EscOS {
     logo_texture: Texture2D,
     windows: Vec<Box<dyn Window>>,
@@ -27,14 +30,23 @@ impl EscOS {
         }
     }
 
-    pub fn draw(&mut self) {
+    pub fn tick(&mut self) {
         self.draw_background();
         self.draw_top_bar();
+
+        for win in &mut self.windows {
+            win.handle_input();
+        }
 
         for win in &mut self.windows {
             if win.is_visible() {
                 win.draw();
             }
+        }
+
+        unsafe {
+            let pos = mouse_position();
+            LAST_MOUSE_POS = Vec2::new(pos.0, pos.1);
         }
     }
 

@@ -4,7 +4,10 @@ use crate::{
 };
 use macroquad::{
     prelude::*,
-    ui::{root_ui, widgets::InputText},
+    ui::{
+        root_ui,
+        widgets::{Button, InputText},
+    },
 };
 
 pub struct LoginWindow {
@@ -21,7 +24,7 @@ impl Window for LoginWindow {
             width: 500.0,
             height: 300.0,
             password_data: String::new(),
-            input_size: Vec2::new(300.0, 70.0),
+            input_size: Vec2::new(300.0, 60.0),
             is_visible: true,
         })
     }
@@ -53,11 +56,24 @@ impl Window for LoginWindow {
         );
 
         // Draw input
+        let input_style = root_ui()
+            .style_builder()
+            .font_size(30)
+            .color(BLANK)
+            .color_hovered(BLANK)
+            .color_clicked(BLANK)
+            .build();
+        let mut skin = root_ui().default_skin();
+        skin.editbox_style = input_style;
+        root_ui().push_skin(&skin);
         InputText::new(1)
-            .position(self.position() - self.input_size * 0.5)
+            .position(self.position() - Vec2::new(self.input_size.x * 0.5, self.input_size.y * 0.4))
             .size(self.input_size)
             .ratio(5.0)
+            .password(true)
             .ui(&mut root_ui(), &mut self.password_data);
+        root_ui().pop_skin();
+
         let bigger_x = self.input_size.x * 1.1;
         let bigger_y = self.input_size.y * 1.1;
         draw_outlined_box(
@@ -69,6 +85,38 @@ impl Window for LoginWindow {
             BG_COLOR,
             FG_COLOR,
         );
+
+        let (button_width, button_height) = (100.0, 50.0);
+
+        let button_style = root_ui()
+            .style_builder()
+            .color(BLANK)
+            .color_hovered(BLANK)
+            .text_color(BG_COLOR)
+            .text_color_hovered(BG_COLOR)
+            .build();
+        let mut skin = root_ui().default_skin();
+        skin.button_style = button_style;
+        root_ui().push_skin(&skin);
+
+        let position = self.position() + Vec2::new(-button_width * 0.5, self.height * 0.25);
+        let (bigger_width, bigger_height) = (button_width * 1.05, button_height * 1.05);
+        let box_position = self.position() + Vec2::new(-bigger_width * 0.5, self.height * 0.245);
+        draw_outlined_box(
+            box_position.x,
+            box_position.y,
+            bigger_width,
+            bigger_height,
+            5.0,
+            FG_COLOR,
+            FG_COLOR,
+        );
+        Button::new("Log-in")
+            .position(position)
+            .size(Vec2::new(button_width, button_height))
+            .ui(&mut root_ui());
+
+        root_ui().pop_skin();
     }
 
     fn top_left(&self) -> Vec2 {
@@ -82,4 +130,6 @@ impl Window for LoginWindow {
     fn set_visibility(&mut self, value: bool) {
         self.is_visible = value;
     }
+
+    fn handle_input(&mut self) {}
 }

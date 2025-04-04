@@ -1,7 +1,7 @@
 mod login;
 mod system;
-mod windows;
 mod text;
+mod windows;
 
 use macroquad::prelude::*;
 use macroquad::window::Conf as WindowConf;
@@ -23,7 +23,7 @@ async fn main() {
     let mut esc_os = EscOS::new().await;
 
     loop {
-        esc_os.draw();
+        esc_os.tick();
 
         next_frame().await
     }

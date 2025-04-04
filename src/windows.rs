@@ -14,6 +14,8 @@ pub trait Window {
     fn is_visible(&self) -> bool;
 
     fn set_visibility(&mut self, value: bool);
+
+    fn handle_input(&mut self);
 }
 
 pub fn draw_outlined_box(

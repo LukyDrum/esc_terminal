@@ -1,9 +1,11 @@
 use macroquad::prelude::*;
 
 use crate::{
-    system::{BG_COLOR, FG_COLOR},
+    system::{BG_COLOR, FG_COLOR, LAST_MOUSE_POS},
     windows::{draw_outlined_box, draw_window_top_bar, Window},
 };
+
+const HEADER_HEIGHT: f32 = 70.0;
 
 pub struct TextWindow {
     position: Vec2,
@@ -48,7 +50,7 @@ impl Window for TextWindow {
             self.top_left().x,
             self.top_left().y,
             self.size.x,
-            40.0,
+            HEADER_HEIGHT,
             FG_COLOR,
             BG_COLOR,
         );
@@ -58,9 +60,9 @@ impl Window for TextWindow {
         let mut line = "a".repeat(count as usize + 2);
         line.push('\n');
         draw_multiline_text(
-            line.repeat(31).as_str(),
+            line.repeat(30).as_str(),
             self.top_left().x + 20.0,
-            self.top_left().y + 70.0,
+            self.top_left().y + HEADER_HEIGHT + 25.0,
             char_size,
             None,
             FG_COLOR,
@@ -73,5 +75,24 @@ impl Window for TextWindow {
 
     fn set_visibility(&mut self, value: bool) {
         self.is_visible = value;
+    }
+
+    fn handle_input(&mut self) {
+        // Check if mouse is pressed in header part
+        let pos = mouse_position();
+        let pos = Vec2::new(pos.0, pos.1);
+        if is_mouse_button_down(MouseButton::Left) && self.is_pos_in_header(pos) {
+            let diff = unsafe { pos - LAST_MOUSE_POS };
+            self.position += diff;
+        }
+    }
+}
+
+impl TextWindow {
+    fn is_pos_in_header(&self, pos: Vec2) -> bool {
+        pos.x > self.top_left().x
+            && pos.x < self.top_left().x + self.size.x
+            && pos.y > self.top_left().y
+            && pos.y < self.top_left().y + HEADER_HEIGHT
     }
 }

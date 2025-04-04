@@ -2,11 +2,14 @@ use chrono::{Local, Timelike};
 use macroquad::prelude::*;
 
 use crate::login::LoginWindow;
+use crate::text::TextWindow;
 use crate::windows::Window;
 
-const BG_COLOR: Color = WHITE;
-const BAR_COLOR: Color = BLACK;
-const BAR_TEXT_COLOR: Color = WHITE;
+pub const BG_COLOR: Color = WHITE;
+pub const FG_COLOR: Color = BLACK;
+
+const BAR_COLOR: Color = FG_COLOR;
+const BAR_TEXT_COLOR: Color = BG_COLOR;
 
 const TOP_BAR_HEIGHT: f32 = 50.0;
 const BAR_FONT_SIZE: (u16, f32) = (1, 40.0);
@@ -20,7 +23,7 @@ impl EscOS {
     pub async fn new() -> Self {
         EscOS {
             logo_texture: load_texture("assets/logo.png").await.unwrap(),
-            windows: vec![LoginWindow::new_boxed()],
+            windows: vec![LoginWindow::new_boxed(), TextWindow::new_boxed()],
         }
     }
 

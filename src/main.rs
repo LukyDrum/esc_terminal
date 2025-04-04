@@ -1,6 +1,7 @@
 mod login;
 mod system;
 mod windows;
+mod text;
 
 use macroquad::prelude::*;
 use macroquad::window::Conf as WindowConf;

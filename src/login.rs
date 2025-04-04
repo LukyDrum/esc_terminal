@@ -1,4 +1,7 @@
-use crate::windows::*;
+use crate::{
+    system::{BG_COLOR, FG_COLOR},
+    windows::*,
+};
 use macroquad::{
     prelude::*,
     ui::{root_ui, widgets::InputText},
@@ -34,8 +37,8 @@ impl Window for LoginWindow {
             self.width,
             self.height,
             5.0,
-            WHITE,
-            BLACK,
+            BG_COLOR,
+            FG_COLOR,
         );
 
         // Label
@@ -44,7 +47,7 @@ impl Window for LoginWindow {
             self.position().x - self.input_size.x * 0.5,
             self.position().y - self.input_size.y,
             50.0,
-            BLACK,
+            FG_COLOR,
         );
 
         // Draw input
@@ -61,8 +64,12 @@ impl Window for LoginWindow {
             bigger_x,
             bigger_y,
             5.0,
-            WHITE,
-            BLACK,
+            BG_COLOR,
+            FG_COLOR,
         );
+    }
+
+    fn top_left(&self) -> Vec2 {
+        self.position() - self.input_size * 0.5
     }
 }

@@ -19,7 +19,7 @@ pub struct LoginWindow {
 }
 
 impl Window for LoginWindow {
-    fn new_boxed() -> Box<dyn Window> {
+    async fn new_boxed() -> Box<dyn Window> {
         Box::new(LoginWindow {
             width: 500.0,
             height: 300.0,
@@ -131,5 +131,11 @@ impl Window for LoginWindow {
         self.is_visible = value;
     }
 
-    fn handle_input(&mut self) {}
+    fn handle_input(&mut self) -> WindowReturnAction {
+        WindowReturnAction::None
+    }
+
+    fn icon(&self) -> Option<&Texture2D> {
+        None
+    }
 }

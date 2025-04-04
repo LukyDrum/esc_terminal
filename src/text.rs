@@ -2,7 +2,7 @@ use macroquad::prelude::*;
 
 use crate::{
     system::{BG_COLOR, FG_COLOR, LAST_MOUSE_POS},
-    windows::{draw_outlined_box, draw_window_top_bar, Window},
+    windows::{draw_outlined_box, draw_window_top_bar, Window, WindowReturnAction},
 };
 
 const HEADER_HEIGHT: f32 = 70.0;
@@ -11,10 +11,11 @@ pub struct TextWindow {
     position: Vec2,
     size: Vec2,
     is_visible: bool,
+    icon: Texture2D,
 }
 
 impl Window for TextWindow {
-    fn new_boxed() -> Box<dyn Window>
+    async fn new_boxed() -> Box<dyn Window>
     where
         Self: Sized,
     {
@@ -22,6 +23,7 @@ impl Window for TextWindow {
             position: Vec2::new(screen_width() * 0.5, screen_height() * 0.7),
             size: Vec2::new(500.0, 700.0),
             is_visible: true,
+            icon: load_texture("assets/document_icon.png").await.unwrap(),
         })
     }
 
@@ -77,14 +79,23 @@ impl Window for TextWindow {
         self.is_visible = value;
     }
 
-    fn handle_input(&mut self) {
+    fn handle_input(&mut self) -> WindowReturnAction {
         // Check if mouse is pressed in header part
         let pos = mouse_position();
         let pos = Vec2::new(pos.0, pos.1);
-        if is_mouse_button_down(MouseButton::Left) && self.is_pos_in_header(pos) {
+        if is_mouse_button_down(MouseButton::Left)
+            && self.is_pos_in_header(pos)
+            && self.is_visible()
+        {
             let diff = unsafe { pos - LAST_MOUSE_POS };
             self.position += diff;
         }
+
+        WindowReturnAction::None
+    }
+
+    fn icon(&self) -> Option<&Texture2D> {
+        Some(&self.icon)
     }
 }
 

@@ -1,7 +1,10 @@
-use macroquad::prelude::*;
+use macroquad::{
+    prelude::*,
+    ui::{root_ui, widgets::Button},
+};
 
 pub trait Window {
-    fn new_boxed() -> Box<dyn Window>
+    async fn new_boxed() -> Box<dyn Window>
     where
         Self: Sized;
 
@@ -15,7 +18,15 @@ pub trait Window {
 
     fn set_visibility(&mut self, value: bool);
 
-    fn handle_input(&mut self);
+    fn handle_input(&mut self) -> WindowReturnAction;
+
+    fn icon(&self) -> Option<&Texture2D>;
+}
+
+#[derive(Clone, Copy)]
+pub enum WindowReturnAction {
+    None,
+    Close,
 }
 
 pub fn draw_outlined_box(

@@ -12,6 +12,7 @@ pub struct LoginWindow {
     height: f32,
     password_data: String,
     input_size: Vec2,
+    is_visible: bool,
 }
 
 impl Window for LoginWindow {
@@ -21,6 +22,7 @@ impl Window for LoginWindow {
             height: 300.0,
             password_data: String::new(),
             input_size: Vec2::new(300.0, 70.0),
+            is_visible: true,
         })
     }
 
@@ -71,5 +73,13 @@ impl Window for LoginWindow {
 
     fn top_left(&self) -> Vec2 {
         self.position() - self.input_size * 0.5
+    }
+
+    fn is_visible(&self) -> bool {
+        self.is_visible
+    }
+
+    fn set_visibility(&mut self, value: bool) {
+        self.is_visible = value;
     }
 }

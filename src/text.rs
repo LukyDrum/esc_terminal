@@ -8,6 +8,7 @@ use crate::{
 pub struct TextWindow {
     position: Vec2,
     size: Vec2,
+    is_visible: bool,
 }
 
 impl Window for TextWindow {
@@ -18,6 +19,7 @@ impl Window for TextWindow {
         Box::new(TextWindow {
             position: Vec2::new(screen_width() * 0.5, screen_height() * 0.7),
             size: Vec2::new(500.0, 700.0),
+            is_visible: true,
         })
     }
 
@@ -63,5 +65,13 @@ impl Window for TextWindow {
             None,
             FG_COLOR,
         );
+    }
+
+    fn is_visible(&self) -> bool {
+        self.is_visible
+    }
+
+    fn set_visibility(&mut self, value: bool) {
+        self.is_visible = value;
     }
 }

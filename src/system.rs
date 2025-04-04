@@ -32,7 +32,9 @@ impl EscOS {
         self.draw_top_bar();
 
         for win in &mut self.windows {
-            win.draw();
+            if win.is_visible() {
+                win.draw();
+            }
         }
     }
 

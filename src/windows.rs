@@ -10,6 +10,10 @@ pub trait Window {
     fn top_left(&self) -> Vec2;
 
     fn draw(&mut self);
+
+    fn is_visible(&self) -> bool;
+
+    fn set_visibility(&mut self, value: bool);
 }
 
 pub fn draw_outlined_box(

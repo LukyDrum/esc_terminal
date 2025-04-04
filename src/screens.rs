@@ -1,8 +1,6 @@
 #[derive(Copy, Clone, PartialEq)]
 pub enum Screen {
-    Login
+    Login,
 }
 
-impl Screen {
-
-}
+impl Screen {}

@@ -5,7 +5,6 @@ use macroquad::prelude::*;
 use macroquad::window::Conf as WindowConf;
 use system::EscOS;
 
-
 // Constants definition
 // STYLE
 
@@ -23,6 +22,7 @@ async fn main() {
 
     loop {
         esc_os.draw_background();
+        esc_os.draw_top_bar();
 
         next_frame().await
     }

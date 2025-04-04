@@ -1,7 +1,8 @@
 use chrono::{Local, Timelike};
 use macroquad::prelude::*;
 
-use crate::windows::{LoginWindow, Window};
+use crate::login::LoginWindow;
+use crate::windows::Window;
 
 const BG_COLOR: Color = WHITE;
 const BAR_COLOR: Color = BLACK;

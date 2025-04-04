@@ -1,5 +1,5 @@
-mod screens;
 mod system;
+mod windows;
 
 use macroquad::prelude::*;
 use macroquad::window::Conf as WindowConf;
@@ -18,11 +18,10 @@ fn window_conf() -> WindowConf {
 
 #[macroquad::main(window_conf)]
 async fn main() {
-    let esc_os = EscOS::new().await;
+    let mut esc_os = EscOS::new().await;
 
     loop {
-        esc_os.draw_background();
-        esc_os.draw_top_bar();
+        esc_os.draw();
 
         next_frame().await
     }

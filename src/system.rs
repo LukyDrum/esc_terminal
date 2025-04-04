@@ -1,8 +1,10 @@
 use chrono::{Local, Timelike};
 use macroquad::prelude::*;
 
+use crate::windows::{LoginWindow, Window};
+
 const BG_COLOR: Color = WHITE;
-const BAR_COLOR: Color = GRAY;
+const BAR_COLOR: Color = BLACK;
 const BAR_TEXT_COLOR: Color = WHITE;
 
 const TOP_BAR_HEIGHT: f32 = 50.0;
@@ -10,16 +12,27 @@ const BAR_FONT_SIZE: (u16, f32) = (1, 40.0);
 
 pub struct EscOS {
     logo_texture: Texture2D,
+    windows: Vec<Box<dyn Window>>,
 }
 
 impl EscOS {
     pub async fn new() -> Self {
         EscOS {
             logo_texture: load_texture("assets/logo.png").await.unwrap(),
+            windows: vec![LoginWindow::new_boxed()],
         }
     }
 
-    pub fn draw_background(&self) {
+    pub fn draw(&mut self) {
+        self.draw_background();
+        self.draw_top_bar();
+
+        for win in &mut self.windows {
+            win.draw();
+        }
+    }
+
+    fn draw_background(&self) {
         clear_background(BG_COLOR);
 
         // Draw logo
@@ -28,7 +41,7 @@ impl EscOS {
         draw_texture(&self.logo_texture, x, y, BG_COLOR);
     }
 
-    pub fn draw_top_bar(&self) {
+    fn draw_top_bar(&self) {
         draw_rectangle(0.0, 0.0, screen_width(), TOP_BAR_HEIGHT, BAR_COLOR);
         let cur_time = Local::now();
         let time_text = format!(

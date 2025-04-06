@@ -1,3 +1,4 @@
+mod minigame;
 mod login;
 mod popup;
 mod system;

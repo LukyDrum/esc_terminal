@@ -65,6 +65,14 @@ impl TextureStorage {
     }
 }
 
+#[derive(Clone, Copy, PartialEq)]
+enum HackStatus {
+    NoUSB,
+    USBOpened(Instant),
+    Minigame,
+    Completed,
+}
+
 pub struct EscOS {
     logo_texture: Texture2D,
     login_window: Box<dyn Window>,
@@ -74,7 +82,8 @@ pub struct EscOS {
     hack_file_content: String,
     last_usb_check: Instant,
     usb_path: String,
-    usb_opened: bool,
+    usb_detected_at: Option<Instant>,
+    hack_status: HackStatus,
 
     udiskie: Child,
 }
@@ -107,7 +116,8 @@ impl EscOS {
             hack_file_content: fs::read_to_string("assets/".to_string() + HACK_FILE_NAME).unwrap(),
             last_usb_check: Instant::now(),
             usb_path: format!("/run/media/{user}/{USB_NAME}/"),
-            usb_opened: false,
+            usb_detected_at: None,
+            hack_status: HackStatus::NoUSB,
 
             udiskie,
         }
@@ -115,12 +125,17 @@ impl EscOS {
 
     pub fn tick(&mut self) {
         // Check hack file
-        if self.check_hack_file() && !self.usb_opened {
-            self.usb_opened = true;
-
+        if self.check_hack_file() && self.hack_status == HackStatus::NoUSB {
+            self.hack_status = HackStatus::USBOpened(Instant::now());
             self.windows.push(Box::new(PopUp::new_with_text(
                 "Hack in progress!".to_string(),
             )));
+        }
+
+        if let HackStatus::USBOpened(instant) = self.hack_status {
+            if Instant::now().duration_since(instant).as_secs() > 2 {
+
+            }
         }
 
         self.draw_background();
@@ -289,10 +304,6 @@ impl EscOS {
     }
 
     fn check_hack_file(&mut self) -> bool {
-        if self.usb_opened {
-            return true;
-        }
-
         let diff = Instant::now().duration_since(self.last_usb_check);
         if diff.as_secs_f32() < 1.0 {
             return false;

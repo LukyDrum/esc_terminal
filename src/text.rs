@@ -3,7 +3,8 @@ use macroquad::prelude::*;
 use crate::{
     system::{BG_COLOR, FG_COLOR, LAST_MOUSE_POS, TEXTURE_STORAGE},
     windows::{
-        draw_outlined_box, draw_window_top_bar, minimize_button, Window, WindowReturnAction,
+        draw_outlined_box, draw_window_top_bar, minimize_button, InputEvent, Window,
+        WindowReturnAction,
     },
 };
 
@@ -86,27 +87,37 @@ impl Window for TextWindow {
         self.is_visible = value;
     }
 
-    fn handle_input(&mut self) -> WindowReturnAction {
+    fn handle_input(&mut self, event: InputEvent) -> WindowReturnAction {
         // Check if mouse is pressed in header part
-        let pos = mouse_position();
-        let pos = Vec2::new(pos.0, pos.1);
-        if is_mouse_button_down(MouseButton::Left)
-            && self.is_pos_in_header(pos)
-            && self.is_visible()
-        {
-            let diff = unsafe { pos - LAST_MOUSE_POS };
-            self.position += diff;
-        }
+        match event {
+            InputEvent::LeftMouse(pos, held) => {
+                if is_mouse_button_down(MouseButton::Left)
+                    && self.is_pos_in_header(pos)
+                {
+                    let diff = unsafe { pos - LAST_MOUSE_POS };
+                    self.position += diff;
+                }
 
-        if is_mouse_button_pressed(MouseButton::Left) && self.is_pos_in_minimize_button(pos) {
-            self.set_visibility(false);
+                if self.is_pos_in_minimize_button(pos) && !held {
+                    WindowReturnAction::Minimize
+                } else {
+                    WindowReturnAction::None
+                }
+            }
+            _ => WindowReturnAction::None,
         }
-
-        WindowReturnAction::None
     }
 
     fn icon(&self) -> Option<Texture2D> {
         unsafe { TEXTURE_STORAGE.document() }
+    }
+
+    fn contains_pos(&self, pos: Vec2) -> bool {
+        let tl = self.top_left();
+        let br = self.top_left() + self.size;
+        let (x, y) = (pos.x, pos.y);
+
+        x >= tl.x && x <= br.x && y >= tl.y && y <= br.y
     }
 }
 

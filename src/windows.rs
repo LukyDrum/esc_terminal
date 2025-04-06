@@ -17,15 +17,25 @@ pub trait Window {
 
     fn set_visibility(&mut self, value: bool);
 
-    fn handle_input(&mut self) -> WindowReturnAction;
+    fn handle_input(&mut self, event: InputEvent) -> WindowReturnAction;
 
     fn icon(&self) -> Option<Texture2D>;
+
+    fn contains_pos(&self, pos: Vec2) -> bool;
 }
 
-#[derive(Clone, Copy)]
 pub enum WindowReturnAction {
     None,
     Minimize,
+    Close,
+    NewWindow(Box<dyn Window>),
+}
+
+#[derive(Copy, Clone)]
+pub enum InputEvent {
+    None,
+    /// Position and if it is being held
+    LeftMouse(Vec2, bool),
 }
 
 pub fn draw_outlined_box(

@@ -1,7 +1,7 @@
 use std::collections::LinkedList;
-use std::fs;
 use std::process::{Child, Command};
 use std::time::Instant;
+use std::{fs, mem};
 
 use chrono::{Local, Timelike};
 use macroquad::prelude::*;
@@ -10,7 +10,7 @@ use macroquad::ui::widgets::Button;
 
 use crate::login::LoginWindow;
 use crate::text::TextWindow;
-use crate::windows::{draw_outlined_box, Window};
+use crate::windows::{draw_outlined_box, InputEvent, Window, WindowReturnAction};
 
 pub const BG_COLOR: Color = WHITE;
 pub const FG_COLOR: Color = BLACK;
@@ -33,6 +33,8 @@ const USB_NAME: &str = "HACKY";
 pub struct TextureStorage {
     document_icon: Option<Texture2D>,
     minimize_icon: Option<Texture2D>,
+    popup_icon: Option<Texture2D>,
+    close_icon: Option<Texture2D>,
 }
 
 impl TextureStorage {
@@ -40,6 +42,8 @@ impl TextureStorage {
         TextureStorage {
             document_icon: None,
             minimize_icon: None,
+            popup_icon: None,
+            close_icon: None,
         }
     }
 
@@ -50,11 +54,21 @@ impl TextureStorage {
     pub fn minimize(&self) -> Option<Texture2D> {
         self.minimize_icon.clone()
     }
+
+    pub fn popup(&self) -> Option<Texture2D> {
+        self.popup_icon.clone()
+    }
+
+    pub fn close(&self) -> Option<Texture2D> {
+        self.close_icon.clone()
+    }
 }
 
 pub struct EscOS {
     logo_texture: Texture2D,
+    login_window: Box<dyn Window>,
     windows: Vec<Box<dyn Window>>,
+    is_unlocked: bool,
 
     hack_file_content: String,
     last_usb_check: Instant,
@@ -77,20 +91,23 @@ impl EscOS {
             TEXTURE_STORAGE = TextureStorage {
                 document_icon: load_texture("assets/document_icon.png").await.ok(),
                 minimize_icon: load_texture("assets/minimize.png").await.ok(),
+                popup_icon: load_texture("assets/warning.png").await.ok(),
+                close_icon: load_texture("assets/close.png").await.ok(),
             };
         }
 
         let user = whoami::username();
         EscOS {
             logo_texture: load_texture("assets/logo.png").await.unwrap(),
-            windows: vec![
-                LoginWindow::new_boxed().await,
-                TextWindow::new_boxed().await,
-            ],
+            login_window: LoginWindow::new_boxed().await,
+            windows: vec![TextWindow::new_boxed().await],
+            is_unlocked: false,
+
             hack_file_content: fs::read_to_string("assets/".to_string() + HACK_FILE_NAME).unwrap(),
             last_usb_check: Instant::now(),
             usb_path: format!("/run/media/{user}/{USB_NAME}/"),
             usb_opened: false,
+
             udiskie,
         }
     }
@@ -104,8 +121,52 @@ impl EscOS {
 
         self.draw_background();
 
-        for win in &mut self.windows {
-            win.handle_input();
+        let mut windows_to_close = LinkedList::new();
+
+        let mouse_pos = vec2(mouse_position().0, mouse_position().1);
+        let mut event = {
+            if is_mouse_button_pressed(MouseButton::Left) {
+                InputEvent::LeftMouse(mouse_pos, false)
+            } else if is_mouse_button_down(MouseButton::Left) {
+                InputEvent::LeftMouse(mouse_pos, true)
+            } else {
+                InputEvent::None
+            }
+        };
+
+        for index in (0..self.windows.len()).rev() {
+            if !self.windows[index].is_visible() {
+                continue;
+            }
+
+            let this_event = if self.windows[index].contains_pos(mouse_pos) {
+                mem::replace(&mut event, InputEvent::None)
+            } else {
+                InputEvent::None
+            };
+            match self.windows[index].handle_input(this_event) {
+                WindowReturnAction::None => {}
+                WindowReturnAction::Minimize => self.windows[index].set_visibility(false),
+                WindowReturnAction::Close => windows_to_close.push_front(index),
+                WindowReturnAction::NewWindow(new_win) => self.windows.push(new_win),
+            }
+        }
+        for index in windows_to_close {
+            self.windows.remove(index);
+        }
+
+        // If the system is locked, draw only login window and not dock
+        if !self.is_unlocked {
+            let this_event = if self.login_window.contains_pos(mouse_pos) {
+                mem::replace(&mut event, InputEvent::None)
+            } else {
+                InputEvent::None
+            };
+            match self.login_window.handle_input(this_event) {
+                WindowReturnAction::NewWindow(new_win) => self.windows.push(new_win),
+                _ => {}
+            }
+            self.login_window.draw();
         }
 
         for win in &mut self.windows {
@@ -114,8 +175,8 @@ impl EscOS {
             }
         }
 
-        self.draw_top_bar();
         self.draw_dock();
+        self.draw_top_bar();
 
         unsafe {
             let pos = mouse_position();

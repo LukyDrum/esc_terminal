@@ -1,4 +1,5 @@
 use crate::{
+    popup::PopUp,
     system::{BG_COLOR, FG_COLOR},
     windows::*,
 };
@@ -16,6 +17,7 @@ pub struct LoginWindow {
     password_data: String,
     input_size: Vec2,
     is_visible: bool,
+    login_button_clicked: bool,
 }
 
 impl Window for LoginWindow {
@@ -26,6 +28,7 @@ impl Window for LoginWindow {
             password_data: String::new(),
             input_size: Vec2::new(300.0, 60.0),
             is_visible: true,
+            login_button_clicked: false,
         })
     }
 
@@ -111,9 +114,10 @@ impl Window for LoginWindow {
             FG_COLOR,
             FG_COLOR,
         );
-        Button::new("Log-in")
+        let button_size = Vec2::new(button_width, button_height);
+        self.login_button_clicked = Button::new("Log-in")
             .position(position)
-            .size(Vec2::new(button_width, button_height))
+            .size(button_size)
             .ui(&mut root_ui());
 
         root_ui().pop_skin();
@@ -131,11 +135,30 @@ impl Window for LoginWindow {
         self.is_visible = value;
     }
 
-    fn handle_input(&mut self) -> WindowReturnAction {
-        WindowReturnAction::None
+    fn handle_input(&mut self, event: InputEvent) -> WindowReturnAction {
+        match event {
+            InputEvent::LeftMouse(_pos, _) => {
+                if self.login_button_clicked {
+                    WindowReturnAction::NewWindow(Box::new(PopUp::new_with_text(
+                        "Error:\nLogin is disabled during emergency\nprotocol!".to_string(),
+                    )))
+                } else {
+                    WindowReturnAction::None
+                }
+            }
+            _ => WindowReturnAction::None,
+        }
     }
 
     fn icon(&self) -> Option<Texture2D> {
         None
+    }
+
+    fn contains_pos(&self, pos: Vec2) -> bool {
+        let tl = self.top_left();
+        let br = self.top_left() + vec2(self.width, self.height);
+        let (x, y) = (pos.x, pos.y);
+
+        x >= tl.x && x <= br.x && y >= tl.y && y <= br.y
     }
 }

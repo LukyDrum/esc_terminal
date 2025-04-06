@@ -5,5 +5,5 @@ edition = "2021"
 
 [dependencies]
 chrono = "0.4.40"
-macroquad = "0.4.14"
+macroquad = { path = "../macroquad/" } 
 whoami = "1.6.0"

@@ -9,6 +9,7 @@ use macroquad::ui::root_ui;
 use macroquad::ui::widgets::Button;
 
 use crate::login::LoginWindow;
+use crate::minigame::{self, MiniGame};
 use crate::popup::PopUp;
 use crate::text::TextWindow;
 use crate::windows::{draw_outlined_box, InputEvent, Window, WindowReturnAction};
@@ -36,6 +37,7 @@ pub struct TextureStorage {
     minimize_icon: Option<Texture2D>,
     popup_icon: Option<Texture2D>,
     close_icon: Option<Texture2D>,
+    minigame_icon: Option<Texture2D>,
 }
 
 impl TextureStorage {
@@ -45,6 +47,7 @@ impl TextureStorage {
             minimize_icon: None,
             popup_icon: None,
             close_icon: None,
+            minigame_icon: None,
         }
     }
 
@@ -62,6 +65,10 @@ impl TextureStorage {
 
     pub fn close(&self) -> Option<Texture2D> {
         self.close_icon.clone()
+    }
+
+    pub fn minigame(&self) -> Option<Texture2D> {
+        self.minigame_icon.clone()
     }
 }
 
@@ -103,6 +110,7 @@ impl EscOS {
                 minimize_icon: load_texture("assets/minimize.png").await.ok(),
                 popup_icon: load_texture("assets/warning.png").await.ok(),
                 close_icon: load_texture("assets/close.png").await.ok(),
+                minigame_icon: load_texture("assets/minigame.png").await.ok(),
             };
         }
 
@@ -134,7 +142,8 @@ impl EscOS {
 
         if let HackStatus::USBOpened(instant) = self.hack_status {
             if Instant::now().duration_since(instant).as_secs() > 2 {
-
+                self.windows.push(Box::new(MiniGame::new()));
+                self.hack_status = HackStatus::Minigame;
             }
         }
 

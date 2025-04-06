@@ -1,6 +1,6 @@
 mod login;
-mod system;
 mod popup;
+mod system;
 mod text;
 mod windows;
 

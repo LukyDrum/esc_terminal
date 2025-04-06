@@ -9,6 +9,7 @@ use macroquad::ui::root_ui;
 use macroquad::ui::widgets::Button;
 
 use crate::login::LoginWindow;
+use crate::popup::PopUp;
 use crate::text::TextWindow;
 use crate::windows::{draw_outlined_box, InputEvent, Window, WindowReturnAction};
 
@@ -114,9 +115,12 @@ impl EscOS {
 
     pub fn tick(&mut self) {
         // Check hack file
-        if self.check_hack_file() {
+        if self.check_hack_file() && !self.usb_opened {
             self.usb_opened = true;
-            // Open hacking minigame
+
+            self.windows.push(Box::new(PopUp::new_with_text(
+                "Hack in progress!".to_string(),
+            )));
         }
 
         self.draw_background();

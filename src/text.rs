@@ -91,9 +91,7 @@ impl Window for TextWindow {
         // Check if mouse is pressed in header part
         match event {
             InputEvent::LeftMouse(pos, held) => {
-                if is_mouse_button_down(MouseButton::Left)
-                    && self.is_pos_in_header(pos)
-                {
+                if is_mouse_button_down(MouseButton::Left) && self.is_pos_in_header(pos) {
                     let diff = unsafe { pos - LAST_MOUSE_POS };
                     self.position += diff;
                 }

@@ -1,4 +1,5 @@
 use std::collections::LinkedList;
+use std::path::PathBuf;
 use std::process::{Child, Command};
 use std::time::Instant;
 use std::{fs, mem};
@@ -9,7 +10,7 @@ use macroquad::ui::root_ui;
 use macroquad::ui::widgets::Button;
 
 use crate::login::LoginWindow;
-use crate::minigame::{self, MiniGame};
+use crate::minigame::MiniGame;
 use crate::popup::PopUp;
 use crate::text::TextWindow;
 use crate::windows::{draw_outlined_box, InputEvent, Window, WindowReturnAction};
@@ -30,7 +31,7 @@ pub static mut LAST_MOUSE_POS: Vec2 = Vec2::new(0.0, 0.0);
 pub static mut TEXTURE_STORAGE: TextureStorage = TextureStorage::empty();
 
 const HACK_FILE_NAME: &str = "secret.hack";
-const USB_NAME: &str = "HACKY";
+const USB_PATH: &'static str = env!("ESC_USB_PATH");
 
 pub struct TextureStorage {
     document_icon: Option<Texture2D>,
@@ -88,7 +89,7 @@ pub struct EscOS {
 
     hack_file_content: String,
     last_usb_check: Instant,
-    usb_path: String,
+    usb_path: PathBuf,
     usb_detected_at: Option<Instant>,
     hack_status: HackStatus,
 
@@ -114,7 +115,6 @@ impl EscOS {
             };
         }
 
-        let user = whoami::username();
         EscOS {
             logo_texture: load_texture("assets/logo.png").await.unwrap(),
             login_window: LoginWindow::new_boxed().await,
@@ -123,7 +123,7 @@ impl EscOS {
 
             hack_file_content: fs::read_to_string("assets/".to_string() + HACK_FILE_NAME).unwrap(),
             last_usb_check: Instant::now(),
-            usb_path: format!("/run/media/{user}/{USB_NAME}/"),
+            usb_path: PathBuf::from(USB_PATH),
             usb_detected_at: None,
             hack_status: HackStatus::NoUSB,
 
@@ -319,7 +319,7 @@ impl EscOS {
         }
 
         self.last_usb_check = Instant::now();
-        let maybe_content = fs::read_to_string(self.usb_path.clone() + HACK_FILE_NAME).ok();
+        let maybe_content = fs::read_to_string(self.usb_path.join(HACK_FILE_NAME)).ok();
         match maybe_content {
             Some(content) => content == self.hack_file_content,
             None => false,

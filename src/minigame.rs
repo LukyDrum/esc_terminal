@@ -10,11 +10,17 @@ const CELL_SIZE: f32 = 40.0;
 const NUM_OF_CELLS: usize = 20;
 const DURATION_BETWEEN_MOVES: TimeDelta = Duration::milliseconds(500);
 
+const EMPTY_COLOR: Color = GRAY;
+const PLAYER_COLOR: Color = GREEN;
+const OBSTACLE_COLOR: Color = BLACK;
+const PASSWORD_COLOR: Color = BLUE;
+
 #[derive(Copy, Clone)]
 enum Cell {
     Empty,
     Player,
     Obstacle,
+    PasswordPiece,
 }
 
 pub struct MiniGame {
@@ -30,6 +36,10 @@ impl MiniGame {
             player_position: (0, 0),
             top_left: vec2(200.0, 180.0),
         }
+    }
+
+    pub fn restart(&mut self) {
+        *self = Self::new();
     }
 }
 
@@ -61,6 +71,23 @@ impl Window for MiniGame {
             BG_COLOR,
             FG_COLOR,
         );
+
+        let mut row_pos = self.top_left().y + 2.5;
+        for row in &self.cells {
+            let mut col_pos = self.top_left.x + 2.5;
+            for cell in row {
+                let color = match cell {
+                    Cell::Obstacle => OBSTACLE_COLOR,
+                    Cell::Empty => EMPTY_COLOR,
+                    Cell::Player => PLAYER_COLOR,
+                    Cell::PasswordPiece => PASSWORD_COLOR,
+                };
+                draw_rectangle(col_pos, row_pos, CELL_SIZE, CELL_SIZE, color);
+
+                col_pos += CELL_SIZE;
+            }
+            row_pos += CELL_SIZE;
+        }
     }
 
     fn is_visible(&self) -> bool {

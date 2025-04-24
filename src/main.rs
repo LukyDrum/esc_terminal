@@ -1,5 +1,5 @@
-mod minigame;
 mod login;
+mod minigame;
 mod popup;
 mod system;
 mod text;

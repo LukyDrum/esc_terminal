@@ -10,12 +10,15 @@ use crate::{
 
 const HEADER_HEIGHT: f32 = 70.0;
 const FIXED_DOC_HEIGHT: f32 = 800.0;
+const SCROLL_SPEED: f32 = 20.0;
 
 pub struct DocumentWindow {
     position: Vec2,
     window_size: Vec2,
     document_name: String,
     document_texture: Texture2D,
+    vertical_offset: f32,
+    max_vertical_offset: f32,
 
     is_visible: bool,
     /// Relative to top-left
@@ -61,12 +64,22 @@ impl Window for DocumentWindow {
             BG_COLOR,
         );
 
+        let params = DrawTextureParams {
+            source: Some(Rect {
+                x: 0.0,
+                y: self.vertical_offset,
+                w: self.document_texture.width(),
+                h: self.window_size.y - HEADER_HEIGHT,
+            }),
+            ..Default::default()
+        };
+
         draw_texture_ex(
             &self.document_texture,
-            self.top_left().x,
+            self.top_left().x + 2.5,
             self.top_left().y + HEADER_HEIGHT,
             WHITE,
-            DrawTextureParams::default(),
+            params,
         );
 
         self.minimize_size = minimize_button(self.top_left() + self.minimize_position_relative);
@@ -94,6 +107,10 @@ impl Window for DocumentWindow {
                 } else {
                     WindowReturnAction::None
                 }
+            },
+            InputEvent::Scroll(scroll) => {
+                self.vertical_offset = (self.vertical_offset - scroll * SCROLL_SPEED).clamp(0.0, self.max_vertical_offset);
+                WindowReturnAction::None
             }
             _ => WindowReturnAction::None,
         }
@@ -122,12 +139,15 @@ impl DocumentWindow {
         };
 
         let width = document_texture.width();
+        let max_vertical_offset = document_texture.height() - (FIXED_DOC_HEIGHT - HEADER_HEIGHT);
 
         Box::new(DocumentWindow {
             position: Vec2::new(screen_width() * 0.5, screen_height() * 0.7),
-            window_size: Vec2::new(width, FIXED_DOC_HEIGHT - HEADER_HEIGHT),
+            window_size: Vec2::new(width + 5.0, FIXED_DOC_HEIGHT - HEADER_HEIGHT + 5.0),
             document_name,
             document_texture,
+            vertical_offset: 0.0,
+            max_vertical_offset,
 
             is_visible: true,
             minimize_position_relative: Vec2::new(width - 50.0, HEADER_HEIGHT * 0.5),

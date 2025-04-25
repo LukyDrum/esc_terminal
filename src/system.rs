@@ -161,12 +161,16 @@ impl EscOS {
         let mut windows_to_close = LinkedList::new();
 
         let mouse_pos = vec2(mouse_position().0, mouse_position().1);
+        let wheel_scroll = mouse_wheel().1;
         let mut event = {
             if is_mouse_button_pressed(MouseButton::Left) {
                 InputEvent::LeftMouse(mouse_pos, false)
             } else if is_mouse_button_down(MouseButton::Left) {
                 InputEvent::LeftMouse(mouse_pos, true)
-            } else {
+            } else if wheel_scroll != 0.0 {
+                InputEvent::Scroll(wheel_scroll)
+            }
+            else {
                 InputEvent::None
             }
         };

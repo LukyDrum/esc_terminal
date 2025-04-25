@@ -37,6 +37,7 @@ pub enum InputEvent {
     None,
     /// Position and if it is being held
     LeftMouse(Vec2, bool),
+    Scroll(f32),
 }
 
 pub fn draw_outlined_box(

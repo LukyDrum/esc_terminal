@@ -1,6 +1,7 @@
-use std::collections::LinkedList;
+use std::collections::{HashMap, LinkedList};
 use std::path::PathBuf;
 use std::process::{Child, Command};
+use std::rc::Rc;
 use std::time::Instant;
 use std::{fs, mem};
 
@@ -9,10 +10,10 @@ use macroquad::prelude::*;
 use macroquad::ui::root_ui;
 use macroquad::ui::widgets::Button;
 
+use crate::document::DocumentWindow;
 use crate::login::LoginWindow;
 use crate::minigame::MiniGame;
 use crate::popup::PopUp;
-use crate::text::TextWindow;
 use crate::windows::{draw_outlined_box, InputEvent, Window, WindowReturnAction};
 
 pub const BG_COLOR: Color = WHITE;
@@ -28,7 +29,7 @@ const DOCK_ICON_SIZE: u32 = 64;
 const DOCK_SPACING: u32 = 16;
 
 pub static mut LAST_MOUSE_POS: Vec2 = Vec2::new(0.0, 0.0);
-pub static mut TEXTURE_STORAGE: TextureStorage = TextureStorage::empty();
+pub static mut TEXTURE_STORAGE: Option<Rc<TextureStorage>> = None;
 
 const HACK_FILE_NAME: &str = "secret.hack";
 const USB_PATH: &'static str = env!("ESC_USB_PATH");
@@ -39,19 +40,14 @@ pub struct TextureStorage {
     popup_icon: Option<Texture2D>,
     close_icon: Option<Texture2D>,
     minigame_icon: Option<Texture2D>,
+    documents: HashMap<String, Texture2D>,
+}
+
+pub fn texture_storage() -> Rc<TextureStorage> {
+    unsafe { TEXTURE_STORAGE.clone().unwrap() }
 }
 
 impl TextureStorage {
-    const fn empty() -> Self {
-        TextureStorage {
-            document_icon: None,
-            minimize_icon: None,
-            popup_icon: None,
-            close_icon: None,
-            minigame_icon: None,
-        }
-    }
-
     pub fn document(&self) -> Option<Texture2D> {
         self.document_icon.clone()
     }
@@ -70,6 +66,14 @@ impl TextureStorage {
 
     pub fn minigame(&self) -> Option<Texture2D> {
         self.minigame_icon.clone()
+    }
+
+    pub fn document_by_name(&self, name: &str) -> Option<Texture2D> {
+        self.documents.get(name).cloned()
+    }
+
+    pub fn fallback_document(&self) -> Texture2D {
+        todo!()
     }
 }
 
@@ -106,19 +110,24 @@ impl EscOS {
 
         // Load Texture storage
         unsafe {
-            TEXTURE_STORAGE = TextureStorage {
+            TEXTURE_STORAGE = Some(Rc::new(TextureStorage {
                 document_icon: load_texture("assets/document_icon.png").await.ok(),
                 minimize_icon: load_texture("assets/minimize.png").await.ok(),
                 popup_icon: load_texture("assets/warning.png").await.ok(),
                 close_icon: load_texture("assets/close.png").await.ok(),
                 minigame_icon: load_texture("assets/minigame.png").await.ok(),
-            };
+                documents: HashMap::from([
+                    ("test".to_owned(), load_texture("assets/documents/test_doc.png").await.unwrap()),
+                ]),
+            }));
         }
 
         EscOS {
             logo_texture: load_texture("assets/logo.png").await.unwrap(),
             login_window: LoginWindow::new_boxed().await,
-            windows: vec![TextWindow::new_boxed().await],
+            windows: vec![
+                DocumentWindow::new_boxed("test".to_owned()),
+            ],
             is_unlocked: false,
 
             hack_file_content: fs::read_to_string("assets/".to_string() + HACK_FILE_NAME).unwrap(),

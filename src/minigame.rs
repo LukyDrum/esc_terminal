@@ -3,13 +3,13 @@ use std::time::{Duration, Instant};
 use macroquad::prelude::*;
 
 use crate::{
-    system::{BG_COLOR, FG_COLOR, TEXTURE_STORAGE},
+    system::{texture_storage, BG_COLOR, FG_COLOR, TEXTURE_STORAGE},
     windows::{draw_outlined_box, Window, WindowReturnAction},
 };
 
 const CELL_SIZE: f32 = 40.0;
 const NUM_OF_CELLS: usize = 20;
-const DURATION_BETWEEN_MOVES: Duration = Duration::from_millis(300);
+const DURATION_BETWEEN_MOVES: Duration = Duration::from_millis(200);
 
 const EMPTY_COLOR: Color = BG_COLOR;
 const PLAYER_COLOR: Color = GREEN;
@@ -226,7 +226,7 @@ impl Window for MiniGame {
     }
 
     fn icon(&self) -> Option<Texture2D> {
-        unsafe { TEXTURE_STORAGE.minigame() }
+        unsafe { texture_storage().minigame()}
     }
 
     fn contains_pos(&self, pos: Vec2) -> bool {

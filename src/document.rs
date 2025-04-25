@@ -1,7 +1,7 @@
 use macroquad::prelude::*;
 
 use crate::{
-    system::{BG_COLOR, FG_COLOR, LAST_MOUSE_POS, TEXTURE_STORAGE},
+    system::{texture_storage, BG_COLOR, FG_COLOR, LAST_MOUSE_POS},
     windows::{
         draw_outlined_box, draw_window_top_bar, minimize_button, InputEvent, Window,
         WindowReturnAction,
@@ -9,28 +9,26 @@ use crate::{
 };
 
 const HEADER_HEIGHT: f32 = 70.0;
+const FIXED_DOC_HEIGHT: f32 = 800.0;
 
-pub struct TextWindow {
+pub struct DocumentWindow {
     position: Vec2,
-    size: Vec2,
+    window_size: Vec2,
+    document_name: String,
+    document_texture: Texture2D,
+
     is_visible: bool,
     /// Relative to top-left
     minimize_position_relative: Vec2,
     minimize_size: Vec2,
 }
 
-impl Window for TextWindow {
+impl Window for DocumentWindow {
     async fn new_boxed() -> Box<dyn Window>
     where
         Self: Sized,
     {
-        Box::new(TextWindow {
-            position: Vec2::new(screen_width() * 0.5, screen_height() * 0.7),
-            size: Vec2::new(500.0, 700.0),
-            is_visible: true,
-            minimize_position_relative: Vec2::new(460.0, HEADER_HEIGHT * 0.5),
-            minimize_size: Vec2::ZERO,
-        })
+        panic!("PLS don't call this function.")
     }
 
     fn position(&self) -> Vec2 {
@@ -38,7 +36,7 @@ impl Window for TextWindow {
     }
 
     fn top_left(&self) -> Vec2 {
-        self.position - self.size * 0.5
+        self.position - self.window_size * 0.5
     }
 
     fn draw(&mut self) {
@@ -46,34 +44,29 @@ impl Window for TextWindow {
         draw_outlined_box(
             self.top_left().x,
             self.top_left().y,
-            self.size.x,
-            self.size.y,
+            self.window_size.x,
+            self.window_size.y,
             5.0,
             BG_COLOR,
             FG_COLOR,
         );
         draw_window_top_bar(
-            "Document preview",
+            &self.document_name,
             30.0,
             self.top_left().x,
             self.top_left().y,
-            self.size.x,
+            self.window_size.x,
             HEADER_HEIGHT,
             FG_COLOR,
             BG_COLOR,
         );
 
-        let char_size = 20.0;
-        let count = (self.size.x - 2.0) / (char_size * 0.5);
-        let mut line = "a".repeat(count as usize + 2);
-        line.push('\n');
-        draw_multiline_text(
-            line.repeat(30).as_str(),
-            self.top_left().x + 20.0,
-            self.top_left().y + HEADER_HEIGHT + 25.0,
-            char_size,
-            None,
-            FG_COLOR,
+        draw_texture_ex(
+            &self.document_texture,
+            self.top_left().x,
+            self.top_left().y + HEADER_HEIGHT,
+            WHITE,
+            DrawTextureParams::default(),
         );
 
         self.minimize_size = minimize_button(self.top_left() + self.minimize_position_relative);
@@ -107,22 +100,44 @@ impl Window for TextWindow {
     }
 
     fn icon(&self) -> Option<Texture2D> {
-        unsafe { TEXTURE_STORAGE.document() }
+        unsafe { texture_storage().document() }
     }
 
     fn contains_pos(&self, pos: Vec2) -> bool {
         let tl = self.top_left();
-        let br = self.top_left() + self.size;
+        let br = self.top_left() + self.window_size;
         let (x, y) = (pos.x, pos.y);
 
         x >= tl.x && x <= br.x && y >= tl.y && y <= br.y
     }
 }
 
-impl TextWindow {
+impl DocumentWindow {
+    pub fn new_boxed(document_name: String) -> Box<dyn Window> {
+        let document_texture = texture_storage().document_by_name(document_name.as_str());
+        let document_texture = if let Some(texture) = document_texture {
+            texture
+        } else {
+            texture_storage().fallback_document()
+        };
+
+        let width = document_texture.width();
+
+        Box::new(DocumentWindow {
+            position: Vec2::new(screen_width() * 0.5, screen_height() * 0.7),
+            window_size: Vec2::new(width, FIXED_DOC_HEIGHT - HEADER_HEIGHT),
+            document_name,
+            document_texture,
+
+            is_visible: true,
+            minimize_position_relative: Vec2::new(width - 50.0, HEADER_HEIGHT * 0.5),
+            minimize_size: Vec2::ZERO,
+        })
+    }
+
     fn is_pos_in_header(&self, pos: Vec2) -> bool {
         pos.x > self.top_left().x
-            && pos.x < self.top_left().x + self.size.x
+            && pos.x < self.top_left().x + self.window_size.x
             && pos.y > self.top_left().y
             && pos.y < self.top_left().y + HEADER_HEIGHT
     }

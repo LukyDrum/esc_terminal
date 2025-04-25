@@ -1,8 +1,8 @@
+mod document;
 mod login;
 mod minigame;
 mod popup;
 mod system;
-mod text;
 mod windows;
 
 use macroquad::prelude::*;

@@ -177,6 +177,14 @@ impl EscOS {
                 WindowReturnAction::Minimize => self.windows[index].set_visibility(false),
                 WindowReturnAction::Close => windows_to_close.push_front(index),
                 WindowReturnAction::NewWindow(new_win) => self.windows.push(new_win),
+                WindowReturnAction::HackCompleted => {
+                    windows_to_close.push_front(index);
+                    self.hack_status = HackStatus::Completed;
+                    self.is_unlocked = true;
+                    self.windows.push(Box::new(PopUp::new_with_text(
+                        "Hack completed!".to_string(),
+                    )));
+                }
             }
         }
         for index in windows_to_close {

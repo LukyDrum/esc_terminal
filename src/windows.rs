@@ -29,6 +29,7 @@ pub enum WindowReturnAction {
     Minimize,
     Close,
     NewWindow(Box<dyn Window>),
+    HackCompleted,
 }
 
 #[derive(Copy, Clone)]

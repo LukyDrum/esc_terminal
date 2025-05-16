@@ -35,7 +35,7 @@ OP___________O_X___O
 O____________O_____O
 O__________________O
 O__________________O
-O__________OOOOOOOOO
+O__________OOOOOOO_O
 O_________________XO
 OOOOOOOOOOOOOOOOOOOO";
 const KEYS_TOTAL: u8 = 5;

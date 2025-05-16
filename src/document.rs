@@ -4,11 +4,10 @@ use crate::{
     system::{texture_storage, BG_COLOR, FG_COLOR, LAST_MOUSE_POS},
     windows::{
         draw_outlined_box, draw_window_top_bar, minimize_button, InputEvent, Window,
-        WindowReturnAction,
+        WindowReturnAction, HEADER_HEIGHT,
     },
 };
 
-const HEADER_HEIGHT: f32 = 70.0;
 const MAX_DOC_HEIGHT: f32 = 1000.0;
 const SCROLL_SPEED: f32 = 35.0;
 

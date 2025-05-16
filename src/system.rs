@@ -11,6 +11,7 @@ use macroquad::ui::root_ui;
 use macroquad::ui::widgets::Button;
 
 use crate::document::DocumentWindow;
+use crate::document_list::DocumentList;
 use crate::login::LoginWindow;
 use crate::minigame::MiniGame;
 use crate::popup::PopUp;
@@ -155,7 +156,7 @@ impl EscOS {
         EscOS {
             logo_texture: load_texture("assets/logo.png").await.unwrap(),
             login_window: LoginWindow::new_boxed().await,
-            windows: vec![DocumentWindow::new_boxed("Document-0466".to_owned())],
+            windows: vec![],
             is_unlocked: false,
 
             hack_file_content: fs::read_to_string("assets/".to_string() + HACK_FILE_NAME).unwrap(),
@@ -218,6 +219,7 @@ impl EscOS {
                 WindowReturnAction::Close => windows_to_close.push_front(index),
                 WindowReturnAction::NewWindow(new_win) => self.windows.push(new_win),
                 WindowReturnAction::HackCompleted => {
+                    windows_to_close.push_front(0);
                     windows_to_close.push_front(index);
                     self.hack_status = HackStatus::Completed;
                     self.is_unlocked = true;

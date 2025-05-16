@@ -2,6 +2,8 @@ use macroquad::prelude::*;
 
 use crate::system::{texture_storage, BG_COLOR, TEXTURE_STORAGE};
 
+pub const HEADER_HEIGHT: f32 = 70.0;
+
 pub trait Window {
     async fn new_boxed() -> Box<dyn Window>
     where

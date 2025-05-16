@@ -10,7 +10,32 @@ use crate::{
 
 const HEADER_HEIGHT: f32 = 70.0;
 const FIXED_DOC_HEIGHT: f32 = 1000.0;
-const SCROLL_SPEED: f32 = 20.0;
+const SCROLL_SPEED: f32 = 35.0;
+
+pub struct VerticalScroller {
+    pub height: f32,
+    pub scroller_height: f32,
+    /// 0 to 1
+    pub percent: f32,
+}
+
+impl VerticalScroller {
+    pub const WIDTH: f32 = 10.0;
+    const BG_COLOR: Color = Color::from_hex(0xA0A0A0);
+
+    pub fn draw(&self, top_left: Vec2) {
+        draw_rectangle(
+            top_left.x,
+            top_left.y,
+            Self::WIDTH,
+            self.height,
+            Self::BG_COLOR,
+        );
+
+        let y = top_left.y + self.percent * (self.height - self.scroller_height);
+        draw_rectangle(top_left.x, y, Self::WIDTH, self.scroller_height, FG_COLOR);
+    }
+}
 
 pub struct DocumentWindow {
     position: Vec2,
@@ -19,6 +44,8 @@ pub struct DocumentWindow {
     document_texture: Texture2D,
     vertical_offset: f32,
     max_vertical_offset: f32,
+    document_height: f32,
+    scroller: VerticalScroller,
 
     is_visible: bool,
     /// Relative to top-left
@@ -82,6 +109,13 @@ impl Window for DocumentWindow {
             params,
         );
 
+        let scroller_pos = self.position
+            + vec2(
+                self.window_size.x * 0.5 - VerticalScroller::WIDTH - 2.5,
+                -self.window_size.y * 0.5 + HEADER_HEIGHT,
+            );
+        self.scroller.draw(scroller_pos);
+
         self.minimize_size = minimize_button(self.top_left() + self.minimize_position_relative);
     }
 
@@ -94,6 +128,8 @@ impl Window for DocumentWindow {
     }
 
     fn handle_input(&mut self, event: InputEvent) -> WindowReturnAction {
+        self.scroller.percent = self.vertical_offset / self.max_vertical_offset;
+
         // Check if mouse is pressed in header part
         match event {
             InputEvent::LeftMouse(pos, held) => {
@@ -140,15 +176,24 @@ impl DocumentWindow {
         };
 
         let width = document_texture.width();
-        let max_vertical_offset = document_texture.height() - (FIXED_DOC_HEIGHT - HEADER_HEIGHT);
+        let max_vertical_offset = document_texture.height() - FIXED_DOC_HEIGHT + 2. * HEADER_HEIGHT;
+
+        let position = Vec2::new(200.0 + screen_width() * 0.5, 50.0 + FIXED_DOC_HEIGHT * 0.5);
+        let scroller = VerticalScroller {
+            height: FIXED_DOC_HEIGHT - 2.0 * HEADER_HEIGHT + 5.0,
+            scroller_height: 50.0,
+            percent: 0.0,
+        };
 
         Box::new(DocumentWindow {
-            position: Vec2::new(200.0 + screen_width() * 0.5, 100.0 + FIXED_DOC_HEIGHT * 0.5),
+            position,
             window_size: Vec2::new(width + 5.0, FIXED_DOC_HEIGHT - HEADER_HEIGHT + 5.0),
             document_name,
+            document_height: document_texture.height(),
             document_texture,
             vertical_offset: 0.0,
             max_vertical_offset,
+            scroller,
 
             is_visible: true,
             minimize_position_relative: Vec2::new(width - 50.0, HEADER_HEIGHT * 0.5),

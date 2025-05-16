@@ -155,7 +155,7 @@ impl EscOS {
         EscOS {
             logo_texture: load_texture("assets/logo.png").await.unwrap(),
             login_window: LoginWindow::new_boxed().await,
-            windows: vec![DocumentWindow::new_boxed("test_doc".to_owned())],
+            windows: vec![DocumentWindow::new_boxed("Document-0466".to_owned())],
             is_unlocked: false,
 
             hack_file_content: fs::read_to_string("assets/".to_string() + HACK_FILE_NAME).unwrap(),

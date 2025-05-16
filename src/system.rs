@@ -100,6 +100,47 @@ pub struct EscOS {
     udiskie: Child,
 }
 
+async fn load_texture_storage() {
+    // Get document names
+    let names = fs::read_dir("./assets/documents/").expect("Failed to read directory entries.");
+    // Load each texture
+    let mut documents = HashMap::new();
+    for future in names.flatten().map(async |entry| {
+        let name = entry
+            .file_name()
+            .into_string()
+            .expect("Failed to parse OsString to String.");
+        let texture = load_texture(format!("assets/documents/{name}").as_str())
+            .await
+            .expect("Failed to load texture.");
+        let name = name
+            .split(".")
+            .nth(0)
+            .expect("Invalid filename.")
+            .to_string();
+
+        (name, texture)
+    }) {
+        let (name, texture) = future.await;
+
+        // Print debug info
+        println!("Load document: {name}");
+
+        documents.insert(name, texture);
+    }
+
+    unsafe {
+        TEXTURE_STORAGE = Some(Rc::new(TextureStorage {
+            document_icon: load_texture("assets/document_icon.png").await.ok(),
+            minimize_icon: load_texture("assets/minimize.png").await.ok(),
+            popup_icon: load_texture("assets/warning.png").await.ok(),
+            close_icon: load_texture("assets/close.png").await.ok(),
+            minigame_icon: load_texture("assets/minigame.png").await.ok(),
+            documents,
+        }));
+    }
+}
+
 impl EscOS {
     pub async fn new() -> Self {
         // Spawn udiskie for automounting
@@ -109,25 +150,12 @@ impl EscOS {
             .expect("Failed to spawn udiskie!");
 
         // Load Texture storage
-        unsafe {
-            TEXTURE_STORAGE = Some(Rc::new(TextureStorage {
-                document_icon: load_texture("assets/document_icon.png").await.ok(),
-                minimize_icon: load_texture("assets/minimize.png").await.ok(),
-                popup_icon: load_texture("assets/warning.png").await.ok(),
-                close_icon: load_texture("assets/close.png").await.ok(),
-                minigame_icon: load_texture("assets/minigame.png").await.ok(),
-                documents: HashMap::from([
-                    ("test".to_owned(), load_texture("assets/documents/test_doc.png").await.unwrap()),
-                ]),
-            }));
-        }
+        load_texture_storage().await;
 
         EscOS {
             logo_texture: load_texture("assets/logo.png").await.unwrap(),
             login_window: LoginWindow::new_boxed().await,
-            windows: vec![
-                DocumentWindow::new_boxed("test".to_owned()),
-            ],
+            windows: vec![DocumentWindow::new_boxed("test_doc".to_owned())],
             is_unlocked: false,
 
             hack_file_content: fs::read_to_string("assets/".to_string() + HACK_FILE_NAME).unwrap(),
@@ -169,8 +197,7 @@ impl EscOS {
                 InputEvent::LeftMouse(mouse_pos, true)
             } else if wheel_scroll != 0.0 {
                 InputEvent::Scroll(wheel_scroll)
-            }
-            else {
+            } else {
                 InputEvent::None
             }
         };

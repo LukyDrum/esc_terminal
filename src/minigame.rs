@@ -3,7 +3,7 @@ use std::time::{Duration, Instant};
 use macroquad::prelude::*;
 
 use crate::{
-    system::{texture_storage, BG_COLOR, FG_COLOR, TEXTURE_STORAGE},
+    system::{texture_storage, BG_COLOR, FG_COLOR},
     windows::{draw_outlined_box, Window, WindowReturnAction},
 };
 
@@ -226,7 +226,7 @@ impl Window for MiniGame {
     }
 
     fn icon(&self) -> Option<Texture2D> {
-        unsafe { texture_storage().minigame()}
+        texture_storage().minigame()
     }
 
     fn contains_pos(&self, pos: Vec2) -> bool {

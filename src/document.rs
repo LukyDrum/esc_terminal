@@ -9,7 +9,7 @@ use crate::{
 };
 
 const HEADER_HEIGHT: f32 = 70.0;
-const FIXED_DOC_HEIGHT: f32 = 800.0;
+const FIXED_DOC_HEIGHT: f32 = 1000.0;
 const SCROLL_SPEED: f32 = 20.0;
 
 pub struct DocumentWindow {
@@ -48,7 +48,7 @@ impl Window for DocumentWindow {
             self.top_left().x,
             self.top_left().y,
             self.window_size.x,
-            self.window_size.y,
+            self.window_size.y + 2.5,
             5.0,
             BG_COLOR,
             FG_COLOR,
@@ -107,9 +107,10 @@ impl Window for DocumentWindow {
                 } else {
                     WindowReturnAction::None
                 }
-            },
+            }
             InputEvent::Scroll(scroll) => {
-                self.vertical_offset = (self.vertical_offset - scroll * SCROLL_SPEED).clamp(0.0, self.max_vertical_offset);
+                self.vertical_offset = (self.vertical_offset - scroll * SCROLL_SPEED)
+                    .clamp(0.0, self.max_vertical_offset);
                 WindowReturnAction::None
             }
             _ => WindowReturnAction::None,
@@ -117,7 +118,7 @@ impl Window for DocumentWindow {
     }
 
     fn icon(&self) -> Option<Texture2D> {
-        unsafe { texture_storage().document() }
+        texture_storage().document()
     }
 
     fn contains_pos(&self, pos: Vec2) -> bool {
@@ -142,7 +143,7 @@ impl DocumentWindow {
         let max_vertical_offset = document_texture.height() - (FIXED_DOC_HEIGHT - HEADER_HEIGHT);
 
         Box::new(DocumentWindow {
-            position: Vec2::new(screen_width() * 0.5, screen_height() * 0.7),
+            position: Vec2::new(200.0 + screen_width() * 0.5, 100.0 + FIXED_DOC_HEIGHT * 0.5),
             window_size: Vec2::new(width + 5.0, FIXED_DOC_HEIGHT - HEADER_HEIGHT + 5.0),
             document_name,
             document_texture,

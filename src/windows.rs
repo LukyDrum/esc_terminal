@@ -75,7 +75,7 @@ pub fn draw_window_top_bar(
 }
 
 pub fn minimize_button(position: Vec2) -> Vec2 {
-    let texture = unsafe { texture_storage().minimize().unwrap() };
+    let texture = texture_storage().minimize().unwrap();
     let size = texture.size();
     draw_texture(
         &texture,

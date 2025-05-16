@@ -72,7 +72,7 @@ impl Window for PopUp {
         );
 
         // Draw close button
-        let icon = unsafe { texture_storage().close() }.unwrap();
+        let icon = texture_storage().close().unwrap();
         let button_style = root_ui()
             .style_builder()
             .color(BLANK)
@@ -115,7 +115,7 @@ impl Window for PopUp {
     }
 
     fn icon(&self) -> Option<Texture2D> {
-        unsafe { texture_storage().popup() }
+        texture_storage().popup()
     }
 
     fn contains_pos(&self, pos: Vec2) -> bool {

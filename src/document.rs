@@ -9,7 +9,7 @@ use crate::{
 };
 
 const HEADER_HEIGHT: f32 = 70.0;
-const FIXED_DOC_HEIGHT: f32 = 1000.0;
+const MAX_DOC_HEIGHT: f32 = 1000.0;
 const SCROLL_SPEED: f32 = 35.0;
 
 pub struct VerticalScroller {
@@ -175,21 +175,23 @@ impl DocumentWindow {
             texture_storage().fallback_document()
         };
 
+        let document_height = document_texture.height();
+        let height = document_height.min(MAX_DOC_HEIGHT);
         let width = document_texture.width();
-        let max_vertical_offset = document_texture.height() - FIXED_DOC_HEIGHT + 2. * HEADER_HEIGHT;
+        let max_vertical_offset = document_texture.height() - height + 2. * HEADER_HEIGHT;
 
-        let position = Vec2::new(200.0 + screen_width() * 0.5, 50.0 + FIXED_DOC_HEIGHT * 0.5);
+        let position = Vec2::new(200.0 + screen_width() * 0.5, 50.0 + height * 0.5);
         let scroller = VerticalScroller {
-            height: FIXED_DOC_HEIGHT - 2.0 * HEADER_HEIGHT + 5.0,
+            height: height - 2.0 * HEADER_HEIGHT + 5.0,
             scroller_height: 50.0,
             percent: 0.0,
         };
 
         Box::new(DocumentWindow {
             position,
-            window_size: Vec2::new(width + 5.0, FIXED_DOC_HEIGHT - HEADER_HEIGHT + 5.0),
+            window_size: Vec2::new(width + 5.0, height - HEADER_HEIGHT + 5.0),
             document_name,
-            document_height: document_texture.height(),
+            document_height,
             document_texture,
             vertical_offset: 0.0,
             max_vertical_offset,

@@ -26,7 +26,7 @@ async fn main() {
     let mut esc_os = EscOS::new().await;
 
     loop {
-        esc_os.tick();
+        esc_os.tick().await;
 
         next_frame().await
     }

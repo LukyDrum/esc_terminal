@@ -37,6 +37,10 @@ impl Window for LoginWindow {
         Vec2::new(screen_width() * 0.5, screen_height() * 0.5)
     }
 
+    fn size(&self) -> Vec2 {
+        Vec2::new(self.width, self.height)
+    }
+
     fn draw(&mut self) {
         // Draw box
         draw_outlined_box(

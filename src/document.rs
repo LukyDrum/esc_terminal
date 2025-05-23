@@ -163,6 +163,10 @@ impl Window for DocumentWindow {
 
         x >= tl.x && x <= br.x && y >= tl.y && y <= br.y
     }
+
+    fn size(&self) -> Vec2 {
+        self.window_size
+    }
 }
 
 impl DocumentWindow {
@@ -200,13 +204,6 @@ impl DocumentWindow {
             minimize_position_relative: Vec2::new(width - 50.0, HEADER_HEIGHT * 0.5),
             minimize_size: Vec2::ZERO,
         })
-    }
-
-    fn is_pos_in_header(&self, pos: Vec2) -> bool {
-        pos.x > self.top_left().x
-            && pos.x < self.top_left().x + self.window_size.x
-            && pos.y > self.top_left().y
-            && pos.y < self.top_left().y + HEADER_HEIGHT
     }
 
     fn is_pos_in_minimize_button(&self, pos: Vec2) -> bool {

@@ -13,6 +13,8 @@ pub trait Window {
 
     fn top_left(&self) -> Vec2;
 
+    fn size(&self) -> Vec2;
+
     fn draw(&mut self);
 
     fn is_visible(&self) -> bool;
@@ -24,6 +26,13 @@ pub trait Window {
     fn icon(&self) -> Option<Texture2D>;
 
     fn contains_pos(&self, pos: Vec2) -> bool;
+
+    fn is_pos_in_header(&self, pos: Vec2) -> bool {
+        pos.x > self.top_left().x
+            && pos.x < self.top_left().x + self.size().x
+            && pos.y > self.top_left().y
+            && pos.y < self.top_left().y + HEADER_HEIGHT
+    }
 }
 
 pub enum WindowReturnAction {

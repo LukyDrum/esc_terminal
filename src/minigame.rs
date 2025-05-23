@@ -85,6 +85,8 @@ pub struct MiniGame {
     keys_collected: u8,
     finish_reached: bool,
     top_left: Vec2,
+    width: f32,
+    height: f32
 }
 
 impl MiniGame {
@@ -99,6 +101,8 @@ impl MiniGame {
             keys_collected: 0,
             finish_reached: false,
             top_left: vec2(200.0, 180.0),
+            width: CELL_SIZE * NUM_OF_CELLS as f32 + 5.0,
+            height: CELL_SIZE * NUM_OF_CELLS as f32 + 5.0,
         }
     }
 
@@ -123,9 +127,13 @@ impl Window for MiniGame {
         self.top_left
     }
 
+    fn size(&self) -> Vec2 {
+        Vec2::new(self.width, self.height)
+    }
+
     fn draw(&mut self) {
-        let width = CELL_SIZE * NUM_OF_CELLS as f32 + 5.0;
-        let height = width;
+        let width = self.width;
+        let height = self.height;
         draw_outlined_box(
             self.top_left.x - 2.5,
             self.top_left.y - 2.5,

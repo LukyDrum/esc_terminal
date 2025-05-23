@@ -56,6 +56,10 @@ impl Window for PopUp {
         )
     }
 
+    fn size(&self) -> Vec2 {
+        Vec2::new(WIDTH, HEIGHT)
+    }
+
     fn draw(&mut self) {
         let tl = self.top_left();
 

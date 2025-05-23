@@ -169,7 +169,7 @@ impl EscOS {
         }
     }
 
-    pub fn tick(&mut self) {
+    pub async fn tick(&mut self) {
         // Check hack file
         if self.check_hack_file() && self.hack_status == HackStatus::NoUSB {
             self.hack_status = HackStatus::USBOpened(Instant::now());
@@ -187,11 +187,7 @@ impl EscOS {
 
         // DEBUG
         if is_key_pressed(KeyCode::Home) {
-            self.hack_status = HackStatus::Completed;
-            self.is_unlocked = true;
-            self.windows.push(Box::new(PopUp::new_with_text(
-                "Hack completed!".to_string(),
-            )));
+            self.on_hack_completed().await;
         }
 
         self.draw_background();
@@ -230,11 +226,7 @@ impl EscOS {
                 WindowReturnAction::HackCompleted => {
                     windows_to_close.push_front(0);
                     windows_to_close.push_front(index);
-                    self.hack_status = HackStatus::Completed;
-                    self.is_unlocked = true;
-                    self.windows.push(Box::new(PopUp::new_with_text(
-                        "Hack completed!".to_string(),
-                    )));
+                    self.on_hack_completed().await;
                 }
             }
         }
@@ -269,6 +261,19 @@ impl EscOS {
             let pos = mouse_position();
             LAST_MOUSE_POS = Vec2::new(pos.0, pos.1);
         }
+    }
+
+    async fn on_hack_completed(&mut self) {
+        self.hack_status = HackStatus::Completed;
+        self.is_unlocked = true;
+        self.windows.push(Box::new(PopUp::new_with_text(
+            "Hack completed!".to_string(),
+        )));
+
+        // Open document list
+        self.windows.push(
+            DocumentList::new_boxed().await
+        );
     }
 
     fn draw_background(&self) {

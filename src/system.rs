@@ -185,6 +185,15 @@ impl EscOS {
             }
         }
 
+        // DEBUG
+        if is_key_pressed(KeyCode::Home) {
+            self.hack_status = HackStatus::Completed;
+            self.is_unlocked = true;
+            self.windows.push(Box::new(PopUp::new_with_text(
+                "Hack completed!".to_string(),
+            )));
+        }
+
         self.draw_background();
 
         let mut windows_to_close = LinkedList::new();

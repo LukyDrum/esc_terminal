@@ -1,5 +1,4 @@
 use macroquad::{
-    color::WHITE,
     math::{vec2, Vec2},
     texture::Texture2D,
     window::{screen_height, screen_width},

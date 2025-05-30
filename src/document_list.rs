@@ -20,7 +20,6 @@ pub struct DocumentList {
     /// Relative to top-left
     minimize_position_relative: Vec2,
     minimize_size: Vec2,
-    texture: Texture2D,
 }
 
 impl Window for DocumentList {
@@ -28,14 +27,12 @@ impl Window for DocumentList {
     where
         Self: Sized,
     {
-        let texture = Texture2D::empty();
         let list = DocumentList {
             position: vec2(screen_width() * 0.5, screen_height() * 0.4),
             window_size: vec2(1000.0, 500.0),
             is_visible: true,
             minimize_position_relative: vec2(WIDTH - 50.0, HEADER_HEIGHT * 0.5),
             minimize_size: Vec2::ZERO,
-            texture,
         };
 
         Box::new(list)
@@ -61,7 +58,7 @@ impl Window for DocumentList {
             FG_COLOR,
         );
         draw_window_top_bar(
-            "Document List",
+            "Document Search",
             30.0,
             self.top_left().x,
             self.top_left().y,
@@ -70,9 +67,6 @@ impl Window for DocumentList {
             FG_COLOR,
             BG_COLOR,
         );
-
-        let Vec2{ x, y} = self.top_left();
-        draw_texture(&self.texture, x, y, WHITE);
 
         self.minimize_size = minimize_button(self.top_left() + self.minimize_position_relative);
     }

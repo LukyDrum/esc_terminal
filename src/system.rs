@@ -266,14 +266,15 @@ impl EscOS {
     async fn on_hack_completed(&mut self) {
         self.hack_status = HackStatus::Completed;
         self.is_unlocked = true;
-        self.windows.push(Box::new(PopUp::new_with_text(
-            "Hack completed!".to_string(),
-        )));
-
+        
         // Open document list
         self.windows.push(
             DocumentList::new_boxed().await
         );
+
+        self.windows.push(Box::new(PopUp::new_with_text(
+            "Hack completed!".to_string(),
+        )));
     }
 
     fn draw_background(&self) {

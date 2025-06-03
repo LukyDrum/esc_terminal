@@ -86,7 +86,7 @@ pub struct MiniGame {
     finish_reached: bool,
     top_left: Vec2,
     width: f32,
-    height: f32
+    height: f32,
 }
 
 impl MiniGame {

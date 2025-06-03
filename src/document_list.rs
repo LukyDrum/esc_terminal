@@ -1,5 +1,9 @@
 use macroquad::{
-    color::{Color, WHITE}, input::{is_mouse_button_down, MouseButton}, math::{vec2, Vec2}, texture::{draw_texture, get_screen_data, Texture2D}, window::{screen_height, screen_width}
+    color::{Color, WHITE},
+    input::{is_mouse_button_down, MouseButton},
+    math::{vec2, Vec2},
+    texture::{draw_texture, get_screen_data, Texture2D},
+    window::{screen_height, screen_width},
 };
 
 use crate::{

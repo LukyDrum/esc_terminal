@@ -160,7 +160,7 @@ impl EscOS {
             windows: vec![],
             is_unlocked: false,
 
-            hack_file_content: fs::read_to_string("assets/".to_string() + HACK_FILE_NAME).unwrap(),
+            hack_file_content: fs::read_to_string(HACK_FILE_NAME).unwrap(),
             last_usb_check: Instant::now(),
             usb_path: PathBuf::from(usb_path),
             usb_detected_at: None,

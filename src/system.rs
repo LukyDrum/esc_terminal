@@ -33,7 +33,6 @@ pub static mut LAST_MOUSE_POS: Vec2 = Vec2::new(0.0, 0.0);
 pub static mut TEXTURE_STORAGE: Option<Rc<TextureStorage>> = None;
 
 const HACK_FILE_NAME: &str = "secret.hack";
-const USB_PATH: &'static str = env!("ESC_USB_PATH");
 
 pub struct TextureStorage {
     document_icon: Option<Texture2D>,
@@ -152,6 +151,8 @@ impl EscOS {
 
         // Load Texture storage
         load_texture_storage().await;
+        let usb_path =
+            std::env::var("ESC_USB_PATH").expect("The env variable `ESC_USB_PATH` was not set!");
 
         EscOS {
             logo_texture: load_texture("assets/logo.png").await.unwrap(),
@@ -161,7 +162,7 @@ impl EscOS {
 
             hack_file_content: fs::read_to_string("assets/".to_string() + HACK_FILE_NAME).unwrap(),
             last_usb_check: Instant::now(),
-            usb_path: PathBuf::from(USB_PATH),
+            usb_path: PathBuf::from(usb_path),
             usb_detected_at: None,
             hack_status: HackStatus::NoUSB,
 
@@ -266,11 +267,9 @@ impl EscOS {
     async fn on_hack_completed(&mut self) {
         self.hack_status = HackStatus::Completed;
         self.is_unlocked = true;
-        
+
         // Open document list
-        self.windows.push(
-            DocumentList::new_boxed().await
-        );
+        self.windows.push(DocumentList::new_boxed().await);
 
         self.windows.push(Box::new(PopUp::new_with_text(
             "Hack completed!".to_string(),
